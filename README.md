@@ -59,3 +59,12 @@ every date readable, every total equal to quantity × price, one spelling per ci
 ## Built with
 
 Python · pandas · openpyxl (Excel output) · pytest
+
+## Need your own data cleaned?
+
+I clean messy sales and customer exports for clients, and build scripts like this one so the same clean-up can run again next month. Send me a sample file and tell me what you need.
+
+<a href="https://www.upwork.com/freelancers/~01b6c711b0162ca691"><img src="https://img.shields.io/badge/Hire%20me%20on-Upwork-14A800?style=for-the-badge&logo=upwork&logoColor=white&labelColor=14213D" alt="Hire me on Upwork"></a>
+<a href="mailto:mazen.elnaghy@gmail.com"><img src="https://img.shields.io/badge/Email-mazen.elnaghy%40gmail.com-FFC42E?style=for-the-badge&labelColor=14213D" alt="Email"></a>
+
+Built by [Mazen Elnaghy](https://github.com/mazenelnaghy-code) · [Portfolio](https://mazenelnaghy-code.github.io)
