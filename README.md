@@ -1,5 +1,7 @@
 # Sales Data Cleaning Tool
 
+[![tests](../../actions/workflows/tests.yml/badge.svg)](../../actions/workflows/tests.yml)
+
 Turns a messy sales export into a clean, analysis-ready file, and writes a report of every change it made.
 
 ![Before and after](assets/before-after.png)
@@ -54,7 +56,9 @@ pytest
 ```
 
 The tests check every date format, money parsing, and that the cleaned output is consistent: no duplicates,
-every date readable, every total equal to quantity × price, one spelling per city.
+every date readable, every total equal to quantity × price, one spelling per city. They also check that a missing
+quantity, price or total is rebuilt from the other two, that wrong totals are corrected, and that rows which can't
+be fixed safely are flagged for review instead of guessed. GitHub Actions runs them on every push.
 
 ## Built with
 

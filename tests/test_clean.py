@@ -37,3 +37,50 @@ if __name__ == "__main__":
         if name.startswith("test_"):
             fn()
             print("passed", name)
+
+
+def small_frame(rows):
+    columns = ["order_id", "order_date", "customer", "city", "product", "quantity", "unit_price", "total"]
+    return pd.DataFrame(rows, columns=columns).astype(str)
+
+
+def test_missing_value_is_rebuilt_from_the_other_two():
+    raw = small_frame([
+        ["S-1", "2024-01-05", "sara", "cairo", "Mouse", "2", "150", ""],      # total missing
+        ["S-2", "2024-01-06", "omar", "giza", "Mouse", "", "150", "450"],     # quantity missing
+        ["S-3", "2024-01-07", "mona", "alex", "Mouse", "4", "N/A", "600"],    # price missing
+    ])
+    df, steps, review = clean(raw)
+    by_id = df.set_index("order_id")
+    assert by_id.loc["S-1", "total"] == 300
+    assert by_id.loc["S-2", "quantity"] == 3
+    assert by_id.loc["S-3", "unit_price"] == 150
+    assert review.empty
+
+
+def test_wrong_total_is_corrected_and_duplicates_removed():
+    raw = small_frame([
+        ["S-1", "05/01/2024", "SARA MAHMOUD", "Alex", "Mouse", "2", "EGP 150", "999"],
+        ["S-1", "05/01/2024", "SARA MAHMOUD", "Alex", "Mouse", "2", "EGP 150", "999"],
+    ])
+    df, steps, _ = clean(raw)
+    assert len(df) == 1
+    row = df.iloc[0]
+    assert (row["customer"], row["city"], row["total"]) == ("Sara Mahmoud", "Alexandria", 300)
+    counts = dict(steps)
+    assert counts["Wrong totals corrected to quantity x price"] == 2
+    assert counts["Duplicate rows removed (same order exported twice)"] == 1
+
+
+def test_rows_that_cannot_be_fixed_are_flagged_not_guessed():
+    raw = small_frame([
+        ["S-1", "someday", "sara", "cairo", "Mouse", "2", "", ""],
+        ["S-2", "2024-01-06", "omar", "giza", "Mouse", "1", "100", "100"],
+        ["S-2", "2024-01-06", "omar", "giza", "Keyboard", "1", "300", "300"],
+    ])
+    df, _, review = clean(raw)
+    reasons = dict(zip(review["order_id"], review["reason"]))
+    assert "date not readable" in reasons["S-1"]
+    assert "price missing" in reasons["S-1"]
+    assert reasons["S-2"] == "same order ID with different details"
+    assert len(df) == 3  # nothing is dropped just because it needs a look
